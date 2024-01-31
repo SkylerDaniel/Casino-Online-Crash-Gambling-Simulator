@@ -706,7 +706,6 @@ function App() {
           </div>
         </Modal>
       </div>
-
       <nav className="navbar">
         <div className="container">
           <span className="logo">Crash Gambling Simulator</span>
@@ -744,7 +743,6 @@ function App() {
           </ul>
         </div>
       </nav>
-
       <div className="grid-container-main">
         <div className="grid-elements" >
 
@@ -764,94 +762,8 @@ function App() {
             </div>
           </div>}
         </div>
-
-        <div className="grid-elements">
-          {(userData && userData !== "No User Authentication") ? (
-            <div>
-
-
-              <h1 className="makeshift-input-group"> Bet Amount</h1>
-              <input
-                className="input_box"
-                placeholder="Type Your Bet Amount"
-
-                onChange={(e) => verifyBetAmount(e.target.value)}
-                value={betAmount}
-                disabled={betActive ? 'disabled' : null}
-                onKeyDown={handleKeyDownBetting}
-              />
-              <br />
-
-              <h1 className="makeshift-input-group" > Auto Cashout Multiplier</h1>
-              <input
-                className="input_box"
-                placeholder="Payout Multiplier"
-                onChange={(e) => verifyMultiplierAmount(e.target.value)}
-                onKeyDown={handleKeyDownBetting}
-                value={autoPayoutMultiplier}
-                disabled={betActive ? 'disabled' : null}
-              />
-
-              <br />
-              {bBettingPhase && !betActive ? (<button class="css-button css-button-3d css-button-3d--grey" onClick={send_bet}>Send Bet</button>) : (
-                <>
-                  {betActive ? (<div>
-                    <button class="css-button css-button-3d css-button-3d--grey" onClick={manual_cashout_early}> {(betActive && liveMultiplier > 1) ? (<span>Cashout at {(liveMultiplier * betAmount).toFixed(2)}</span>) : ("Starting...")}</button>
-                  </div>) : (<div>
-                    <button class={`css-button css-button-3d css-button-3d--grey ${bBetForNextRound ? ('bet_for_next_round_active') : ('')}`} onClick={bet_next_round}>{bBetForNextRound ? ("Cancel Bet") : ("Bet Next round")} </button>
-                  </div>)}
-                </>
-              )}
-            </div>
-          ) : (<h1 > <a href="#" onClick={() => {
-            setOpenModalLogin(true)
-            setAuthResponseMessage('')
-          }}
-            className="quickLoginOrRegister" > Login </a>
-            or
-            <a href="#" onClick={() => {
-              setOpenModalRegister(true)
-              setAuthResponseMessage('')
-            }}
-              className="quickLoginOrRegister" > Register </a>
-            to place a bet</h1>)}
-          <div style={{ color: 'red', fontWeight: 600, marginTop: '5px' }}>{errorMessage}</div>
-
-        </div>
-        <div className="grid-elements">Chat <br />
-          <div className="chat-box-wrapper">
-            <div className="chat-box-rectangle">
-              {chatHistory ? (<>
-                {
-                  (chatHistory).map((message) => {
-
-                    return <div className="individual-chat-message" key={uuidv4()}>
-                      <span className="message_top">{message.the_username} </span>
-                      <span className="message_top_time">{message.the_time} -&nbsp;
-                        {message.the_date} </span> <br />
-                      <span className="message_bottom">{message.message_body}</span>
-                    </div>
-                  })
-                }
-              </>) : (<h1>Loading Chat history </h1>)}
-            </div>
-          </div>
-
-          {(userData && userData !== "No User Authentication") ? (<>
-            <input
-              className="input_box_for_chat"
-              placeholder="Send A Message"
-              onChange={(e) => setMessageToTextBox(e.target.value)}
-              value={messageToTextBox}
-              onKeyDown={handleKeyDownChat}
-            />
-            <br />
-          </>) :
-            (<h3>Log in to send a chat message</h3>)}
-
-        </div>
-
-        <div className="grid-elements">Crash History
+        <div className="grid-elements"></div>
+        {/* <div className="grid-elements">Crash History
           <div class="container-crash-history">
 
             <ul class="history-table">
@@ -874,7 +786,7 @@ function App() {
             </ul>
           </div>
 
-        </div>
+        </div> */}
         <div className="grid-elements">Live Bets Tracker
           <ul class="active-bet-table">
             <li class="active-bet-table-header">

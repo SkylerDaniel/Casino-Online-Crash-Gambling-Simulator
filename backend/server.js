@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose").set('debug', true);
 mongoose.set('useFindAndModify', false);
 const express = require("express");
 const cors = require("cors");
@@ -38,14 +38,19 @@ io.on("connection", (socket) => {
 server.listen(3001, () => {
 })
 
+console.log("connected before")
 // Connect to MongoDB 
 mongoose.connect(
   process.env.MONGOOSE_DB_LINK,
   {
+    family: 4,
     useNewUrlParser: true,
     useUnifiedTopology: true,
   },
-);
+).then(() => console.log("Successfully connected to MongoDB"))
+.catch(err => console.log(err));
+
+console.log("connected after")
 
 // Backend Setup
 app.use(bodyParser.json());
@@ -56,6 +61,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(
   session({
     secret: process.env.PASSPORT_SECRET,
@@ -118,7 +124,19 @@ app.get("/logout", (req, res) => {
 
 app.get("/multiply", checkAuthenticated, async (req, res) => {
   const thisUser = await User.findById(req.user._id);
-  const game_loop = await Game_loop.findById(GAME_LOOP_ID)
+  let game_loop = await Game_loop.findById(GAME_LOOP_ID)
+  game_loop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   crashMultipler = game_loop.multiplier_crash
   thisUser.balance = (thisUser.balance + crashMultipler)
   await thisUser.save();
@@ -128,7 +146,19 @@ app.get("/multiply", checkAuthenticated, async (req, res) => {
 
 app.get('/generate_crash_value', async (req, res) => {
   const randomInt = Math.floor(Math.random() * 6) + 1
-  const game_loop = await Game_loop.findById(GAME_LOOP_ID)
+  let game_loop = await Game_loop.findById(GAME_LOOP_ID)
+  game_loop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   game_loop.multiplier_crash = randomInt
   await game_loop.save()
   res.json(randomInt)
@@ -136,7 +166,21 @@ app.get('/generate_crash_value', async (req, res) => {
 })
 
 app.get('/retrieve', async (req, res) => {
-  const game_loop = await Game_loop.findById(GAME_LOOP_ID)
+  console.log("retrieve===")
+  let game_loop = await Game_loop.findById("GAME_LOOP_ID")
+  game_loop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
+  console.log("retrieve========")
   crashMultipler = game_loop.multiplier_crash
   res.json(crashMultipler)
   const delta = sw.read(2);
@@ -155,6 +199,18 @@ app.post('/send_bet', checkAuthenticated, async (req, res) => {
   }
   bDuplicate = false
   theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   playerIdList = theLoop.active_player_id_list
   let now = Date.now()
   for (var i = 0; i < playerIdList.length; i++) {
@@ -193,6 +249,18 @@ app.post('/send_bet', checkAuthenticated, async (req, res) => {
 app.get('/calculate_winnings', checkAuthenticated, async (req, res) => {
 
   let theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   playerIdList = theLoop.active_player_id_list
   crash_number = theLoop.multiplier_crash
   for (const playerId of playerIdList) {
@@ -203,12 +271,24 @@ app.get('/calculate_winnings', checkAuthenticated, async (req, res) => {
     }
   }
   theLoop.active_player_id_list = []
-  await theLoop.save()
+  // await theLoop.save()
   res.json("You clicked on the calcualte winnings button ")
 })
 
 app.get('/get_game_status', async (req, res) => {
   let theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   io.emit('crash_history', theLoop.previous_crashes)
   io.emit('get_round_id_list', theLoop.round_id_list)
   if (betting_phase == true) {
@@ -226,13 +306,25 @@ app.get('/manual_cashout_early', checkAuthenticated, async (req, res) => {
     return
   }
   theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   let time_elapsed = (Date.now() - phase_start_time) / 1000.0
   current_multiplier = (1.0024 * Math.pow(1.0718, time_elapsed)).toFixed(2)
   if ((current_multiplier <= game_crash_value) && theLoop.active_player_id_list.includes(req.user.id)) {
     const currUser = await User.findById(req.user.id)
     currUser.balance += currUser.bet_amount * current_multiplier
     await currUser.save()
-    await theLoop.updateOne({ $pull: { "active_player_id_list": req.user.id } })
+    // await theLoop.updateOne({ $pull: { "active_player_id_list": req.user.id } })
     for (const bettorObject of live_bettors_table) {
       if (bettorObject.the_user_id === req.user.id) {
         bettorObject.cashout_multiplier = current_multiplier
@@ -253,13 +345,25 @@ app.get('/auto_cashout_early', checkAuthenticated, async (req, res) => {
     return
   }
   theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   let time_elapsed = (Date.now() - phase_start_time) / 1000.0
   current_multiplier = (1.0024 * Math.pow(1.0718, time_elapsed)).toFixed(2)
   if ((req.user.payout_multiplier <= game_crash_value) && theLoop.active_player_id_list.includes(req.user.id)) {
     const currUser = await User.findById(req.user.id)
     currUser.balance += currUser.bet_amount * currUser.payout_multiplier
     await currUser.save()
-    await theLoop.updateOne({ $pull: { "active_player_id_list": req.user.id } })
+    // await theLoop.updateOne({ $pull: { "active_player_id_list": req.user.id } })
     for (const bettorObject of live_bettors_table) {
       if (bettorObject.the_user_id === req.user.id) {
         bettorObject.cashout_multiplier = currUser.payout_multiplier
@@ -283,6 +387,18 @@ app.post('/send_message_to_chatbox', checkAuthenticated, async (req, res) => {
     the_date: new Date().toLocaleDateString(),
   }
   theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   const somevar = await Game_loop.findOneAndUpdate(
     { _id: GAME_LOOP_ID },
     { $push: { chat_messages_list: message_json } },
@@ -295,6 +411,18 @@ app.post('/send_message_to_chatbox', checkAuthenticated, async (req, res) => {
 
 app.get('/get_chat_history', async (req, res) => {
   theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   res.json(theLoop.chat_messages_list)
   return
 })
@@ -306,6 +434,18 @@ app.get('/retrieve_active_bettors_list', async (req, res) => {
 
 app.get('/retrieve_bet_history', async (req, res) => {
   let theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   io.emit('crash_history', theLoop.previous_crashes)
   return
 })
@@ -331,6 +471,18 @@ app.listen(4000, () => {
 
 const cashout = async () => {
   theLoop = await Game_loop.findById(GAME_LOOP_ID)
+  theLoop = {
+    round_number: 1,
+    active_player_id_list: [],
+    multiplier_crash: 0,
+    b_betting_phase: false,
+    b_game_phase: false,
+    b_cashout_phase: false,
+    time_now: -1,
+    previous_crashes: [],
+    round_id_list: [],
+    chat_messages_list: []
+  }
   playerIdList = theLoop.active_player_id_list
   crash_number = game_crash_value
   for (const playerId of playerIdList) {
@@ -342,7 +494,7 @@ const cashout = async () => {
     }
   }
   theLoop.active_player_id_list = []
-  await theLoop.save()
+  // await theLoop.save()
 }
 
 // Run Game Loop
@@ -383,14 +535,26 @@ const loopUpdate = async () => {
       cashout()
       sent_cashout = true
       right_now = Date.now()
-      const update_loop = await Game_loop.findById(GAME_LOOP_ID)
-      await update_loop.updateOne({ $push: { previous_crashes: game_crash_value } })
-      await update_loop.updateOne({ $unset: { "previous_crashes.0": 1 } })
-      await update_loop.updateOne({ $pull: { "previous_crashes": null } })
-      const the_round_id_list = update_loop.round_id_list
-      await update_loop.updateOne({ $push: { round_id_list: the_round_id_list[the_round_id_list.length - 1] + 1 } })
-      await update_loop.updateOne({ $unset: { "round_id_list.0": 1 } })
-      await update_loop.updateOne({ $pull: { "round_id_list": null } })
+      // let update_loop = await Game_loop.findById(GAME_LOOP_ID)
+      // update_loop = {
+      //   round_number: 1,
+      //   active_player_id_list: [],
+      //   multiplier_crash: 0,
+      //   b_betting_phase: false,
+      //   b_game_phase: false,
+      //   b_cashout_phase: false,
+      //   time_now: -1,
+      //   previous_crashes: [],
+      //   round_id_list: [],
+      //   chat_messages_list: []
+      // }
+      // await update_loop.updateOne({ $push: { previous_crashes: game_crash_value } })
+      // await update_loop.updateOne({ $unset: { "previous_crashes.0": 1 } })
+      // await update_loop.updateOne({ $pull: { "previous_crashes": null } })
+      // const the_round_id_list = update_loop.round_id_list
+      // await update_loop.updateOne({ $push: { round_id_list: the_round_id_list[the_round_id_list.length - 1] + 1 } })
+      // await update_loop.updateOne({ $unset: { "round_id_list.0": 1 } })
+      // await update_loop.updateOne({ $pull: { "round_id_list": null } })
     }
 
     if (time_elapsed > 3) {
@@ -409,6 +573,19 @@ const loopUpdate = async () => {
       }
       io.emit('update_user')
       let theLoop = await Game_loop.findById(GAME_LOOP_ID)
+      theLoop = {
+        round_number: 1,
+        active_player_id_list: [],
+        multiplier_crash: 0,
+        b_betting_phase: false,
+        b_game_phase: false,
+        b_cashout_phase: false,
+        time_now: -1,
+        previous_crashes: [],
+        round_id_list: [],
+        chat_messages_list: []
+      }
+      
       io.emit('crash_history', theLoop.previous_crashes)
       io.emit('get_round_id_list', theLoop.round_id_list)
       io.emit('start_betting_phase')
